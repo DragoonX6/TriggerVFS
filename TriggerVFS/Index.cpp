@@ -221,7 +221,7 @@ bool CIndex::AddVFS(const char* VfsName)
 	char* name = new char[strlen(VfsName) + 1];
 	CIndex::NormalizePath(VfsName, name);
 	short len = strlen(name);
-	for(int i = 0; i < len; i++)
+	for(short i = 0; i < len; i++)
 	{
 		name[i] = toupper(name[i]);
 	}
@@ -264,8 +264,13 @@ short CIndex::AddFile(const char* VfsName, const char* FileName, const char* Tar
 				return 3; // can't open
 			}
 			CVFSFile::File* TargetFile = new CVFSFile::File();
-			char* NormalizedTargetName = new char[strlen(TargetName) + 1];
+			short len = strlen(TargetName) + 1;
+			char* NormalizedTargetName = new char[len];
 			CIndex::NormalizePath(TargetName, NormalizedTargetName);
+			for(short j = 0; j < (len - 1); j++)
+			{
+				NormalizedTargetName[j] = toupper(NormalizedTargetName[j]);
+			}
 			TargetFile->path = NormalizedTargetName;
 			TargetFile->version = version;
 			TargetFile->crc = crc;
