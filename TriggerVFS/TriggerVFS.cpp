@@ -10,6 +10,8 @@ CIndex* __stdcall OpenVFS(const char * FileName, const char * Mode)
 	CIndex* idx = new CIndex();
 	if(!idx->Open(FileName, "rb"))
 	{
+		delete idx;
+		idx = NULL;
 		return NULL;
 	}
 	return idx;

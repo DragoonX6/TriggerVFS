@@ -13,16 +13,18 @@ class CVFSFile
 public:
 	struct File
 	{
-		int currentPosition;
-		char* data;
+		unsigned int currentPosition;
+		unsigned char* data;
 		char* path;
-		int offset;
-		int lenght;
+		unsigned int offset;
+		unsigned int lenght;
+		unsigned int lEndOff;
 		int hash;
-		int crc;
+		unsigned int crc;
 		int version;
 		bool deleted;
 		int vfsIndex;
+		unsigned char btEncrypted;
 	};
 };
 struct VFileInfo

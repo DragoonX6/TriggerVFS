@@ -97,9 +97,10 @@ bool CIndex::Open(const char* FileName, const char* Mode)
 			int bs = IFile->Read<int>();
 			RoseFile->deleted = IFile->Read<bool>();
 			bool ct = IFile->Read<bool>();
-			bool et = IFile->Read<bool>();
+			RoseFile->btEncrypted = IFile->Read<unsigned char>();
 			RoseFile->version = IFile->Read<int>();
 			RoseFile->crc = IFile->Read<int>();
+			RoseFile->lEndOff = RoseFile->lenght;
 			RoseFile->hash = toHash(RoseFile->path);
 			(*i)->Files->push_back(RoseFile); // do allow deleted files
 			if(!RoseFile->deleted) // but do not make a hash for them

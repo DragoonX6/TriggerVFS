@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ROSE_ROOT)\bins\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(ROSE_ROOT)\objs\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			>
@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\stlport(2005)&quot;"
+				AdditionalIncludeDirectories="&quot;$(ROSE_ROOT)\3rdparty\stlport&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_STATIC_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,10 +61,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib(2005)\MDd\stlportd_statix.lib"
+				AdditionalDependencies="stlportd_statix.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;$(ROSE_ROOT)\3rdparty\stlport\libs\$(PlatformName)\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				ImportLibrary="$(ROSE_ROOT)\libs\$(PlatformName)\$(ConfigurationName)\$(TargetName).lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -94,8 +96,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ROSE_ROOT)\bins\$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(ROSE_ROOT)\objs\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -120,16 +122,19 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;..\stlport(2005)&quot;"
+				OmitFramePointers="true"
+				AdditionalIncludeDirectories="&quot;$(ROSE_ROOT)\3rdparty\stlport&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_STATIC_LIB"
+				ExceptionHandling="0"
 				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
 				EnableEnhancedInstructionSet="2"
 				FloatingPointModel="2"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 				CallingConvention="2"
 			/>
 			<Tool
@@ -143,13 +148,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="..\lib(2005)\MD\stlport_statix.lib"
+				AdditionalDependencies="stlport_statix.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(ROSE_ROOT)\libs\$(PlatformName)\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
+				ImportLibrary="$(ROSE_ROOT)\libs\$(PlatformName)\$(ConfigurationName)\$(TargetName).lib"
 				TargetMachine="1"
 			/>
 			<Tool

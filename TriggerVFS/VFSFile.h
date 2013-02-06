@@ -15,11 +15,13 @@ public:
 		char* path;
 		unsigned int offset;
 		unsigned int lenght;
+		unsigned int lEndOff;
 		int hash;
 		unsigned int crc;
 		int version;
 		bool deleted;
 		int vfsIndex;
+		unsigned char btEncrypted;
 	};
 	CVFSFile(void);
 	~CVFSFile(void);
