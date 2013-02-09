@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TriggerVFS", "TriggerVFS\TriggerVFS.vcproj", "{0A767269-9F25-4A7B-9479-C82B61D9C209}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TriggerVFS", "TriggerVFS\TriggerVFS(2005).vcproj", "{0A767269-9F25-4A7B-9479-C82B61D9C209}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
