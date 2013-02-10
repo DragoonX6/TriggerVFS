@@ -1,4 +1,7 @@
 #include "TriggerVFS.h"
+#include "Index.h"
+
+CIndex* idx = NULL;
 
 bool __stdcall __ConvertPath(const char * path , char* path2 )
 {
@@ -7,12 +10,18 @@ bool __stdcall __ConvertPath(const char * path , char* path2 )
 
 CIndex* __stdcall OpenVFS(const char * FileName, const char * Mode)
 {
-	CIndex* idx = new CIndex();
-	if(!idx->Open(FileName, "rb"))
+	if(!idx)
 	{
-		delete idx;
-		idx = NULL;
-		return NULL;
+		idx = new CIndex();
+	}
+	if(!idx->IsOpen())
+	{
+		if(!idx->Open(FileName, "rb"))
+		{
+			delete idx;
+			idx = NULL;
+			return NULL;
+		}
 	}
 	return idx;
 }
@@ -24,6 +33,8 @@ void __stdcall CloseVFS(CIndex* hVFS)
 		return; // invalid handle
 	}
 	hVFS->Close();
+	delete hVFS;
+	hVFS = NULL;
 }
 
 bool __stdcall VAddVfs(CIndex* hVFS, const char * VfsName)

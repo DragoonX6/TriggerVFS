@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;..\stlport&quot;"
+				AdditionalIncludeDirectories="..\stlport"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_STATIC_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -122,7 +122,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="&quot;..\stlport&quot;"
+				AdditionalIncludeDirectories="..\stlport"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_STATIC_LIB"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -134,6 +134,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="0"
+				CallingConvention="2"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -195,6 +196,10 @@
 			</File>
 			<File
 				RelativePath=".\Index.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\main.cpp"
 				>
 			</File>
 			<File

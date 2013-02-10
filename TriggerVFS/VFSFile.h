@@ -3,7 +3,7 @@
 #include <vector>
 #include "FlatFile.hpp"
 #include "Hashtable.h"
-using namespace _STL;
+using namespace std;
 
 class CVFSFile
 {

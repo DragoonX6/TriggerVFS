@@ -3,20 +3,25 @@
 #include <algorithm>
 #include <cctype>
 
-CIndex::CIndex(void): baseVersion(0), currentVersion(0), vfsCount(0), changed(false)
+CIndex::CIndex(void): baseVersion(0), currentVersion(0), vfsCount(0), changed(false), Opened(false)
 {
 	ListVFS = new vector<CVFSFile*>();
+	Root = new CVFSFile();
 }
 
 CIndex::~CIndex(void)
 {
 	if(ListVFS)
 	{
-		for(vector<CVFSFile*>::reverse_iterator i = ListVFS->rbegin(); i != ListVFS->rend(); ++i)
+		for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 		{
-			delete (*i);
-			(*i) = NULL;
+			if((*i))
+			{
+				delete (*i);
+				(*i) = NULL;
+			}
 		}
+		ListVFS->clear();
 		delete ListVFS;
 		ListVFS = NULL;
 	}
@@ -29,11 +34,8 @@ CIndex::~CIndex(void)
 		delete IFile;
 		IFile = NULL;
 	}
-	if(name)
-	{
-		delete name;
-		name = NULL;
-	}
+	delete Root;
+	Root = NULL;
 }
 
 bool CIndex::Open(const char* FileName, const char* Mode)
@@ -116,6 +118,7 @@ bool CIndex::Open(const char* FileName, const char* Mode)
 		(*i)->VFile = new FlatFile();
 		(*i)->VFile->Open((*i)->GetVFSName(), "rb+");
 	}
+	Opened = true;
 	return true;
 }
 
@@ -128,17 +131,22 @@ void CIndex::Close()
 			this->changed = false;
 		}
 		IFile->Close();
+		delete IFile;
+		IFile = NULL;
 	}
 	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 	{
 		(*i)->VFile->Close();
+		delete (*i);
+		(*i) = NULL;
 	}
 }
 
 bool CIndex::Safe()
 {
-	char TmpName[128];
-	memset(TmpName, 0, 128);
+	short len = strlen(this->name) + 1;
+	char* TmpName = new char[len + 4];
+	memset(TmpName, 0, (len + 4));
 	strcpy(TmpName, this->name);
 	strcat(TmpName, ".tmp");
 	if(!IFile->Open(TmpName, "wb"))
@@ -213,29 +221,33 @@ bool CIndex::Safe()
 	{
 		return false;
 	}
+	delete[] TmpName;
+	TmpName = NULL;
 	changed = false;
 	return true;
 }
 
 bool CIndex::AddVFS(const char* VfsName)
 {
-	char* name = new char[strlen(VfsName) + 1];
-	CIndex::NormalizePath(VfsName, name);
-	short len = strlen(name);
+	char* NormalizedName = new char[strlen(VfsName) + 1];
+	CIndex::NormalizePath(VfsName, NormalizedName);
+	short len = strlen(NormalizedName);
 	for(short i = 0; i < len; i++)
 	{
-		name[i] = toupper(name[i]);
+		name[i] = toupper(NormalizedName[i]);
 	}
-	if(!strcmp(name, "ROOT.VFS"))
+	if(!strcmp(NormalizedName, "ROOT.VFS"))
 	{
 		return false;
 	} 
 	CVFSFile* Vfs = new CVFSFile();
-	Vfs->SetVFSName(name);
+	Vfs->SetVFSName(NormalizedName);
 	this->vfsCount++;
 	this->changed = true;
-	Vfs->VFile = new FlatFile(name, "wb");
+	Vfs->VFile = new FlatFile(NormalizedName, "wb");
 	ListVFS->push_back(Vfs);
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return true;
 }
 
@@ -305,6 +317,8 @@ short CIndex::AddFile(const char* VfsName, const char* FileName, const char* Tar
 			srcFile->Close();
 			delete srcFile;
 			srcFile = NULL;
+			delete[] NormalizedTargetName;
+			NormalizedTargetName = NULL;
 		}
 	}
 	if(VfsFound == false)
@@ -326,9 +340,13 @@ short CIndex::RemoveFile(const char* FileName)
 			RoseFile->deleted = true;
 			(*i)->FileTable.removeHash(toHash(NormalizedName));
 			(*i)->SetDeleteCount((*i)->GetDeleteCount() + 1);
+			delete[] NormalizedName;
+			NormalizedName = NULL;
 			return 0; // succes
 		}
 	}
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return 3; // doesn't exist
 }
 
@@ -381,9 +399,9 @@ void CIndex::Defragment(VCALLBACK_CLEARBLANKALL CallBackProc)
 	}
 	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 	{
-		short len = strlen((*i)->GetVFSName());
-		char TmpVfsName[128];
-		memset(TmpVfsName, 0, 128);
+		short len = strlen((*i)->GetVFSName()) + 1;
+		char *TmpVfsName = new char[len + 4];
+		memset(TmpVfsName, 0, (len + 4));
 		strcpy(TmpVfsName, (*i)->GetVFSName());
 		strcat(TmpVfsName, ".TMP");
 		FlatFile* TmpVfsFile = new FlatFile(TmpVfsName, "wb+");
@@ -416,6 +434,10 @@ void CIndex::Defragment(VCALLBACK_CLEARBLANKALL CallBackProc)
 		(*i)->VFile->Delete();
 		rename(TmpVfsName, (*i)->GetVFSName());
 		(*i)->VFile->Open((*i)->GetVFSName(), "rb+");
+		delete TmpVfsFile;
+		TmpVfsFile = NULL;
+		delete[] TmpVfsName;
+		TmpVfsName = NULL;
 	}
 	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 	{
@@ -461,14 +483,19 @@ void CIndex::GetFileInfo(const char* FileName, VFileInfo* FileInfo, bool CalcCrc
 			{
 				FileInfo->dwCRC = (*i)->CalculateCrc32(RoseFile);
 				RoseFile->crc = FileInfo->dwCRC;
+				delete[] NormalizedName;
+				NormalizedName = NULL;
 				return;
 			}
 			else
 			{
 				FileInfo->dwCRC = RoseFile->crc;
+				return;
 			}
 		}
 	}
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return;
 }
 
@@ -483,9 +510,13 @@ bool CIndex::SetFileInfo(const char* FileName, VFileInfo* FileInfo)
 		{
 			RoseFile->crc = FileInfo->dwCRC;
 			RoseFile->version = FileInfo->dwVersion;
+			delete[] NormalizedName;
+			NormalizedName = NULL;
 			return true;
 		}
 	}
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return false;
 }
 
@@ -603,10 +634,13 @@ CVFSFile::File* CIndex::OpenFile(const char* FileName)
 			FFile->Close();
 			delete FFile;
 			FFile = NULL;
+			Root->Files->push_back(RoseFile);
 			return RoseFile;
 		}
 		else
 		{
+			delete[] NormalizedName;
+			NormalizedName = NULL;
 			delete FFile;
 			FFile = NULL;
 		}
@@ -622,20 +656,33 @@ CVFSFile::File* CIndex::OpenFile(const char* FileName)
 				(*i)->VFile->Seek(RoseFile->offset);
 				(*i)->VFile->ReadData(RoseFile->data, RoseFile->lenght);
 				RoseFile->currentPosition = 0;
+				delete[] NormalizedName;
+				NormalizedName = NULL;
 				return RoseFile;
 			}
 		}
 	}
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return 0;
 }
 
 int CIndex::GetFileSize(const char* FileName)
 {
-	CVFSFile::File* RoseFile = OpenFile(FileName);
-	if(RoseFile)
+	CVFSFile::File* RoseFile;
+	char* NormalizedName = new char[strlen(FileName) + 1];
+	CIndex::NormalizePath(FileName, NormalizedName);
+	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); i++)
 	{
-		return RoseFile->lenght;
+		if((*i)->FileTable.getHash(toHash(NormalizedName), &RoseFile))
+		{
+			delete[] NormalizedName;
+			NormalizedName = NULL;
+			return RoseFile->lenght;
+		}
 	}
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return 0;
 }
 
@@ -645,6 +692,8 @@ bool CIndex::FileExists(const char* FileName)
 	CIndex::NormalizePath(FileName, NormalizedName);
 	if(FlatFile::Exist(NormalizedName))
 	{
+		delete[] NormalizedName;
+		NormalizedName = NULL;
 		return true;
 	}
 	else
@@ -654,10 +703,14 @@ bool CIndex::FileExists(const char* FileName)
 			CVFSFile::File* RoseFile;
 			if((*i)->FileTable.getHash(toHash(NormalizedName), &RoseFile))
 			{
+				delete[] NormalizedName;
+				NormalizedName = NULL;
 				return true;
 			}
 		}
 	}
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return false;
 }
 
@@ -670,8 +723,17 @@ bool CIndex::FileExistsInVfs(const char* FileName)
 		CVFSFile::File* RoseFile;
 		if((*i)->FileTable.getHash(toHash(NormalizedName), &RoseFile))
 		{
+			delete[] NormalizedName;
+			NormalizedName = NULL;
 			return true;
 		}
 	}
+	delete[] NormalizedName;
+	NormalizedName = NULL;
 	return false;
+}
+
+bool CIndex::IsOpen()
+{
+	return this->Opened;
 }

@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <io.h>
 #include <errno.h>
-using namespace _STL;
+using namespace std;
 
 class FlatFile : public File {
 public:
@@ -29,9 +29,7 @@ public:
 	}
 
 	bool Open(const char* path, const char* method){
-		//fopen_s(&fh, path, method); 
-		// no fopen_s because it doesn't allow to open the same file multiple times
-		fh = fopen(path, method);
+		fopen_s(&fh, path, method); 
 		file = path;
 		return IsOpen();
 	}

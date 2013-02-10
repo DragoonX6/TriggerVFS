@@ -10,15 +10,23 @@ CVFSFile::~CVFSFile(void)
 {
 	if(Files)
 	{
-		for(vector<CVFSFile::File*>::reverse_iterator i = Files->rbegin(); i != Files->rend(); ++i)
+		for(vector<CVFSFile::File*>::iterator i = Files->begin(); i != Files->end(); ++i)
 		{
-			if((*i)->data)
+			if((*i))
 			{
-				delete (*i)->data;
-				(*i)->data = NULL;
+				if((*i)->data)
+				{
+					delete (*i)->data;
+					(*i)->data = NULL;
+				}
+				if((*i)->path)
+				{
+					delete (*i)->path;
+					(*i)->path = NULL;
+				}
+				delete (*i);
+				(*i) = NULL;
 			}
-			delete (*i);
-			(*i) = NULL;
 		}
 		Files->clear();
 		delete Files;
@@ -32,6 +40,11 @@ CVFSFile::~CVFSFile(void)
 		}
 		delete VFile;
 		VFile = NULL;
+	}
+	if(vfsName)
+	{
+		delete vfsName;
+		vfsName = NULL;
 	}
 }
 

@@ -3,7 +3,7 @@
 #include <vector>
 #include "FlatFile.hpp"
 #include "VFSFile.h"
-using namespace _STL;
+using namespace std;
 
 // no need to add Windows.h
 typedef unsigned long DWORD;
@@ -14,6 +14,8 @@ struct VFileInfo
 	DWORD dwVersion;
 	DWORD dwCRC;
 };
+
+extern class CIndex* idx;
 
 class CIndex
 {
@@ -43,13 +45,16 @@ public:
 	int GetFileSize(const char* FileName);
 	bool FileExists(const char* FileName);
 	bool FileExistsInVfs(const char* FileName);
+	bool IsOpen();
 	vector<CVFSFile*>* ListVFS;
 private:
+	bool Opened;
 	bool changed;
 	char* name;
 	int baseVersion;
 	int currentVersion;	
 	int vfsCount; //why such a big lenght for vfsCount :O
+	CVFSFile* Root;
 	FlatFile* IFile;
 };
 
