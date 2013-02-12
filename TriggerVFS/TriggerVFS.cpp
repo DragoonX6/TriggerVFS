@@ -1,7 +1,7 @@
 #include "TriggerVFS.h"
 #include "Index.h"
 
-CIndex* idx = NULL;
+CIndex* idx = 0;
 
 bool __stdcall __ConvertPath(const char * path , char* path2 )
 {
@@ -16,7 +16,7 @@ CIndex* __stdcall OpenVFS(const char * FileName, const char * Mode)
 	}
 	if(!idx->IsOpen())
 	{
-		if(!idx->Open(FileName, "rb"))
+		if(!idx->Open(FileName, Mode))
 		{
 			delete idx;
 			idx = NULL;
@@ -47,7 +47,7 @@ bool __stdcall VAddVfs(CIndex* hVFS, const char * VfsName)
 }
 
 short __stdcall VAddFile(CIndex* hVFS, const char * VfsName, const char *FileName, const char * TargetName, DWORD dwVersion, DWORD dwCrc, 
-			   BYTE btEncType, BYTE btCompress, bool bUseDel)
+						 BYTE btEncType, BYTE btCompress, bool bUseDel)
 {
 	if(hVFS == 0 || hVFS == (CIndex*)(-1))
 	{
@@ -198,11 +198,18 @@ size_t __stdcall vfread(void *buffer, size_t size, size_t count, CVFSFile::File*
 	{
 		return 0;
 	}
+
 	if((pVFH->currentPosition + (size * count)) <= pVFH->lenght)
 	{
-		memcpy(buffer, pVFH->data + pVFH->currentPosition, (size * count));
-		pVFH->currentPosition += (size * count);
-		return count;
+		size_t readsize = size * count;
+		if((pVFH->currentPosition + readsize) >= pVFH->lEndOff)
+		{
+			readsize = (pVFH->lEndOff - pVFH->currentPosition);
+		}
+
+		memcpy(buffer, pVFH->data + pVFH->currentPosition, readsize);
+		pVFH->currentPosition += readsize;
+		return (readsize / size);
 	}
 	return 0;
 }

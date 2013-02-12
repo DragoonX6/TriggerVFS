@@ -41,7 +41,7 @@ CIndex::~CIndex(void)
 bool CIndex::Open(const char* FileName, const char* Mode)
 {
 	IFile = new FlatFile();
-	if(!IFile->Open(FileName, Mode))
+	if(!IFile->Open(FileName, "rb"))
 	{
 		return false;
 	}
@@ -102,7 +102,7 @@ bool CIndex::Open(const char* FileName, const char* Mode)
 			RoseFile->btEncrypted = IFile->Read<unsigned char>();
 			RoseFile->version = IFile->Read<int>();
 			RoseFile->crc = IFile->Read<int>();
-			RoseFile->lEndOff = RoseFile->lenght;
+			RoseFile->lEndOff = RoseFile->offset + RoseFile->lenght;
 			RoseFile->hash = toHash(RoseFile->path);
 			(*i)->Files->push_back(RoseFile); // do allow deleted files
 			if(!RoseFile->deleted) // but do not make a hash for them
@@ -118,7 +118,7 @@ bool CIndex::Open(const char* FileName, const char* Mode)
 		(*i)->VFile = new FlatFile();
 		(*i)->VFile->Open((*i)->GetVFSName(), "rb+");
 	}
-	Opened = true;
+	this->Opened = true;
 	return true;
 }
 
@@ -130,16 +130,10 @@ void CIndex::Close()
 		{
 			this->changed = false;
 		}
-		IFile->Close();
-		delete IFile;
-		IFile = NULL;
 	}
-	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
-	{
-		(*i)->VFile->Close();
-		delete (*i);
-		(*i) = NULL;
-	}
+	IFile->Close();
+	delete IFile;
+	IFile = NULL;
 }
 
 bool CIndex::Safe()
@@ -625,6 +619,9 @@ CVFSFile::File* CIndex::OpenFile(const char* FileName)
 			RoseFile->currentPosition = 0;
 			RoseFile->deleted = false;
 			RoseFile->lenght = FFile->Size();
+			RoseFile->offset = 0;
+			RoseFile->lEndOff = RoseFile->lenght;
+			RoseFile->btEncrypted = 0;
 			RoseFile->data = new unsigned char[RoseFile->lenght];
 			FFile->ReadData(RoseFile->data, RoseFile->lenght);
 			RoseFile->crc = 0;
@@ -647,9 +644,10 @@ CVFSFile::File* CIndex::OpenFile(const char* FileName)
 	}
 	else
 	{
+		CVFSFile::File* RoseFile;
+
 		for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 		{
-			CVFSFile::File* RoseFile;
 			if((*i)->FileTable.getHash(toHash(NormalizedName), &RoseFile))
 			{
 				RoseFile->data = new unsigned char[RoseFile->lenght];
@@ -672,7 +670,7 @@ int CIndex::GetFileSize(const char* FileName)
 	CVFSFile::File* RoseFile;
 	char* NormalizedName = new char[strlen(FileName) + 1];
 	CIndex::NormalizePath(FileName, NormalizedName);
-	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); i++)
+	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 	{
 		if((*i)->FileTable.getHash(toHash(NormalizedName), &RoseFile))
 		{

@@ -3,8 +3,11 @@
 
 #include "File.hpp"
 #include <cstdio>
+#include <fcntl.h>
 #include <io.h>
 #include <errno.h>
+#include <map>
+#include <share.h>
 using namespace std;
 
 class FlatFile : public File {
@@ -28,7 +31,8 @@ public:
 		return true;
 	}
 
-	bool Open(const char* path, const char* method){
+	bool Open(const char* path, const char* method)
+	{
 		fopen_s(&fh, path, method); 
 		file = path;
 		return IsOpen();

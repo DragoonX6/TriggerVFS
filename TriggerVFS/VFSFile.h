@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <Windows.h>
 #include "FlatFile.hpp"
 #include "Hashtable.h"
 using namespace std;

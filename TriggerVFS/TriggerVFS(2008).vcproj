@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\stlport"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_STATIC_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_DYNAMIC_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="stlportd_statix.lib"
+				AdditionalDependencies="stlportd.5.2.lib"
 				OutputFile="$(OutDir)\TriggerVFS.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;..\lib(2008)\MDd&quot;"
@@ -123,7 +123,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="..\stlport"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_STATIC_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;TRIGGERVFS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_STLP_USE_DYNAMIC_LIB"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="stlport_statix.lib"
+				AdditionalDependencies="stlport.5.2.lib"
 				OutputFile="$(OutDir)\TriggerVFS.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;..\lib(2008)\MD&quot;"
