@@ -57,27 +57,90 @@ extern "C" {
 #define VFSEEK_END SEEK_END
 #define VFSEEK_SET SEEK_SET
 
+/*! @brief Converts a path to a path suited for loading and searching in the VFS
+ * @param path, IN, String that needs to be converted to a correct path for file loading
+ * @param path2, OUT, Converted string
+ * @return always true
+ */
 TRIGGERVFS_API bool __stdcall __ConvertPath (const char * path , char * path2 );
 
-/// Index File Openmodes: "w+", "r+", "r"
+/*! @brief Open the Rose filesystem
+ * @param FileName, IN
+ * @param Mode, Ignored
+ * @return Pointer of CIndex* idx
+ */
 TRIGGERVFS_API CIndex* __stdcall OpenVFS (const char * FileName, const char * Mode = "r");
 
-/// Index File Close
+/*! @brief Close the Rose filesystem
+ * @param hVFS, IN, put here the pointer obtained from OpenVFS
+ */
 TRIGGERVFS_API void __stdcall CloseVFS (CIndex* hVFS);
 
+/*! @brief Add VFS file to the filesystem
+ * @param hVFS, IN, OpenVFS pointer
+ * @VfsName, IN, The name of the new VFSFile
+ * @return Fails if CIndex pointer is invalid or VfsName == ROOT.VFS
+ */
 TRIGGERVFS_API bool __stdcall VAddVfs (CIndex* hVFS, const char * VfsName);
 
+/*! @brief Adds a file to the specified VFS
+ * @param hVFS, IN, OpenVFS pointer
+ * @param VfsName, IN
+ * @param FileName, IN, the name of the file in the folder
+ * @param TargetName, IN, the path of the file in the VFS
+ * @param dwVersion, IN, the version of the file, presumably currentverion + 1
+ * @param dwCrc, IN, throw CalcCrc in here
+ * @param btEncType, Ignored
+ * @param btCompress, Ignored
+ * @param bUseDel, IN, specifies if the file is initially deleted or not, you may want to set this to false
+ * @return
+ * returns VADDFILE_SUCCESS when everything went ok
+ * VADDFILE_INVALIDHANDLE if the pointer gotten from OpenVFS is invalid (param 1)
+ * VADDFILE_INVALIDVFS if the VFS is nonexistent
+ * VADDFILE_CANTOPENFILE if it can't open FileName
+ * VADDFILE_EXISTSALREADY if the file already exists
+ * VADDFILE_DONTEXIST if FileName doesn't exist
+ * VADDFILE_MEMALLOCFAIL if it can't allocate memory for the file
+ * VADDFILE_ZEROFILESIZE if the file is empty
+ */
 TRIGGERVFS_API short __stdcall VAddFile (CIndex* hVFS, const char * VfsName, const char *FileName, const char * TargetName, DWORD dwVersion, DWORD dwCrc, 
 			   BYTE btEncType, BYTE btCompress, bool bUseDel);
 
+/*! @brief Removes a file from the specified VFS
+ * @param hVFS, IN, OpenVFS pointer
+ * @param FileName, IN, file to remove
+ * @return 
+ * returns VRMVFILE_SUCCESS when everything went ok
+ * VRMVFILE_DONTEXIST if the file doesn't exist
+ * VRMVFILE_INVALIDHANDLE if the pointer gotten from OpenVFS is invalid (param 1)
+ */
 TRIGGERVFS_API short __stdcall VRemoveFile (CIndex* hVFS, const char *FileName);
 
+/*! @brief Defragment the Rose filesystem
+ * See the example on osrose on how to work with this function
+ * @param hVFS, IN, OpenVFS pointer
+ * @param CallBackProc, IN, address of the callback function
+ */
 TRIGGERVFS_API void __stdcall VClearBlankAll (CIndex* hVFS, VCALLBACK_CLEARBLANKALL CallBackProc = NULL);
 
+/*! @brief Get the version and the crc of a file
+ * @param hVFS, IN, OpenVFS pointer
+ * @param FileName, IN
+ * @param FileInfo, REF
+ * @param CalcCrc, specify if the crc has to be calculated for the file.
+ */
 TRIGGERVFS_API void __stdcall VGetFileInfo (CIndex* hVFS, const char *FileName, VFileInfo* FileInfo, bool bCalCrc);
 
+/*! @brief Set the version and the crc of a file
+ * @param hVFS, IN, OpenVFS pointer
+ * @param FileName, IN
+ * @param FileInfo, IN
+ * @return true at succes, false at fail
+ */
 TRIGGERVFS_API bool __stdcall VSetFileInfo (CIndex* hVFS, const char *FileName, VFileInfo* FileInfo);
 
+/*! @brief 
+ */
 TRIGGERVFS_API int __stdcall VGetVfsCount (CIndex* hVFS);
 
 TRIGGERVFS_API int __stdcall VGetVfsNames (CIndex* hVFS, char **ppFiles, DWORD dwNum, short dwMaxPath);

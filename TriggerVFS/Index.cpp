@@ -40,6 +40,7 @@ CIndex::~CIndex(void)
 
 bool CIndex::Open(const char* FileName, const char* Mode)
 {
+	UNREFERENCED_PARAMETER(Mode);
 	IFile = new FlatFile();
 	if(!IFile->Open(FileName, "rb"))
 	{
@@ -253,6 +254,10 @@ short CIndex::AddFile(const char* VfsName, const char* FileName, const char* Tar
 	{
 		return 2; // invalid vfs
 	}
+	if(FileExistsInVfs(name.c_str()))
+	{
+		return 4;
+	}
 	bool VfsFound = false;
 	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 	{
@@ -287,6 +292,12 @@ short CIndex::AddFile(const char* VfsName, const char* FileName, const char* Tar
 			TargetFile->hash = toHash(TargetFile->path);
 			TargetFile->offset = (*i)->VFile->Size();
 			TargetFile->lenght = srcFile->Size();
+			if(TargetFile->lenght == 0)
+			{
+				delete TargetFile;
+				TargetFile = NULL;
+				return 10;
+			}
 			TargetFile->data = new unsigned char[TargetFile->lenght];
 			if(TargetFile->data == NULL || TargetFile->data == (unsigned char*)-1)
 			{
@@ -475,6 +486,12 @@ void CIndex::GetFileInfo(const char* FileName, VFileInfo* FileInfo, bool CalcCrc
 			FileInfo->dwVersion = RoseFile->version;
 			if(CalcCrc)
 			{
+				if(!RoseFile->data)
+				{
+					(*i)->VFile->Seek(RoseFile->offset);
+					RoseFile->data = new unsigned char[RoseFile->lenght];
+					(*i)->VFile->ReadData(RoseFile->data, RoseFile->lenght);
+				}
 				FileInfo->dwCRC = (*i)->CalculateCrc32(RoseFile);
 				RoseFile->crc = FileInfo->dwCRC;
 				delete[] NormalizedName;
@@ -523,7 +540,7 @@ int CIndex::GetVFSNames(char** Names, unsigned int Num, short MaxPathLength)
 {
 	for(vector<CVFSFile*>::iterator i = ListVFS->begin(); i != ListVFS->end(); ++i)
 	{
-		Names[distance(ListVFS->begin(), i)] = (*i)->GetVFSName();
+		strncpy(Names[distance(ListVFS->begin(), i)], (*i)->GetVFSName(), MaxPathLength - 1);
 		Names[distance(ListVFS->begin(), i)][MaxPathLength - 1] = 0;
 	}
 	return vfsCount;
@@ -571,13 +588,15 @@ int CIndex::GetFileNames(const char* VfsName, char** FileNames, int NumberToGet,
 	{
 		if(!strcmp((*i)->GetVFSName(), Name.c_str()))
 		{
-			for(int j = 0; Files < NumberToGet && j < MaxCount; j++)
+			int k = 0;
+			for(vector<CVFSFile::File*>::iterator j = (*i)->Files->begin(); j != (*i)->Files->end(); ++j)
 			{
-				if(!(*i)->Files->at(j)->deleted)
+				if(!(*j)->deleted)
 				{
-					FileNames[distance(ListVFS->begin(), i)] = (*i)->Files->at(j)->path;
-					FileNames[distance(ListVFS->begin(), i)][MaxPathLength - 1] = 0;
+					strncpy(FileNames[k], (*j)->path, MaxPathLength - 1);
+					FileNames[k][MaxPathLength - 1] = 0;
 					Files++;
+					k++;
 				}
 			}
 		}

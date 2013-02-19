@@ -49,6 +49,8 @@ bool __stdcall VAddVfs(CIndex* hVFS, const char * VfsName)
 short __stdcall VAddFile(CIndex* hVFS, const char * VfsName, const char *FileName, const char * TargetName, DWORD dwVersion, DWORD dwCrc, 
 						 BYTE btEncType, BYTE btCompress, bool bUseDel)
 {
+	UNREFERENCED_PARAMETER(btEncType);
+	UNREFERENCED_PARAMETER(btCompress);
 	if(hVFS == 0 || hVFS == (CIndex*)(-1))
 	{
 		return 1; // invalid handle
@@ -76,7 +78,7 @@ void __stdcall VClearBlankAll(CIndex* hVFS, VCALLBACK_CLEARBLANKALL CallBackProc
 
 void __stdcall VGetFileInfo(CIndex* hVFS, const char *FileName, VFileInfo* FileInfo, bool bCalCrc)
 {
-	if(hVFS == 0 || hVFS == (CIndex*)(-1))
+	if(hVFS == 0 || hVFS == (CIndex*)(-1) || FileInfo == 0)
 	{
 		return; // invalid handle
 	}
