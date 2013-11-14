@@ -17,7 +17,7 @@ public:
 		unsigned char* data;
 		char* path;
 		unsigned int offset;
-		unsigned int lenght;
+		unsigned int length;
 		unsigned int lEndOff;
 		int hash;
 		unsigned int crc;

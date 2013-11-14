@@ -96,14 +96,14 @@ bool CIndex::Open(const char* FileName, const char* Mode)
 			short len = IFile->Read<short>();
 			RoseFile->path = (char*)IFile->ReadBytes(len);
 			RoseFile->offset = IFile->Read<int>();
-			RoseFile->lenght = IFile->Read<int>();
+			RoseFile->length = IFile->Read<int>();
 			int bs = IFile->Read<int>();
 			RoseFile->deleted = IFile->Read<bool>();
 			bool ct = IFile->Read<bool>();
 			RoseFile->btEncrypted = IFile->Read<unsigned char>();
 			RoseFile->version = IFile->Read<int>();
 			RoseFile->crc = IFile->Read<int>();
-			RoseFile->lEndOff = RoseFile->offset + RoseFile->lenght;
+			RoseFile->lEndOff = RoseFile->offset + RoseFile->length;
 			RoseFile->hash = toHash(RoseFile->path);
 			(*i)->Files->push_back(RoseFile); // do allow deleted files
 			if(!RoseFile->deleted) // but do not make a hash for them
@@ -178,8 +178,8 @@ bool CIndex::Safe()
 			IFile->Write<short>(length);
 			IFile->WriteData((*j)->path, length);
 			IFile->Write<int>((*j)->offset);
-			IFile->Write<int>((*j)->lenght);
-			IFile->Write<int>((*j)->lenght);
+			IFile->Write<int>((*j)->length);
+			IFile->Write<int>((*j)->length);
 			IFile->Write<bool>((*j)->deleted);
 			IFile->Write(false);
 			IFile->Write(false);
@@ -188,9 +188,9 @@ bool CIndex::Safe()
 			{
 				if(!(*j)->data)
 				{
-					(*j)->data = new unsigned char[(*j)->lenght];
+					(*j)->data = new unsigned char[(*j)->length];
 					(*i)->VFile->Seek((*j)->offset);
-					(*i)->VFile->ReadData((*j)->data, (*j)->lenght);
+					(*i)->VFile->ReadData((*j)->data, (*j)->length);
 				}
 				(*j)->crc = (*i)->CalculateCrc32((*j));
 				IFile->Write<int>((*j)->crc);
@@ -291,21 +291,21 @@ short CIndex::AddFile(const char* VfsName, const char* FileName, const char* Tar
 			TargetFile->deleted = false;
 			TargetFile->hash = toHash(TargetFile->path);
 			TargetFile->offset = (*i)->VFile->Size();
-			TargetFile->lenght = srcFile->Size();
-			if(TargetFile->lenght == 0)
+			TargetFile->length = srcFile->Size();
+			if(TargetFile->length == 0)
 			{
 				delete TargetFile;
 				TargetFile = NULL;
 				return 10;
 			}
-			TargetFile->data = new unsigned char[TargetFile->lenght];
+			TargetFile->data = new unsigned char[TargetFile->length];
 			if(TargetFile->data == NULL || TargetFile->data == (unsigned char*)-1)
 			{
 				delete TargetFile;
 				TargetFile = NULL;
 				return 6; // memalloc fail
 			}
-			if(!srcFile->ReadData(TargetFile->data, TargetFile->lenght))
+			if(!srcFile->ReadData(TargetFile->data, TargetFile->length))
 			{
 				delete TargetFile;
 				TargetFile = NULL;
@@ -313,7 +313,7 @@ short CIndex::AddFile(const char* VfsName, const char* FileName, const char* Tar
 			}
 			long pos = (*i)->VFile->Position();
 			(*i)->VFile->Seek((*i)->VFile->Size());
-			(*i)->VFile->WriteData(TargetFile->data, TargetFile->lenght);
+			(*i)->VFile->WriteData(TargetFile->data, TargetFile->length);
 			(*i)->VFile->Seek(pos);
 			(*i)->Files->push_back(TargetFile);
 			(*i)->FileTable.addHash(TargetFile->hash, TargetFile);
@@ -416,18 +416,18 @@ void CIndex::Defragment(VCALLBACK_CLEARBLANKALL CallBackProc)
 			{
 				if(!(*j)->data)
 				{
-					(*j)->data = new unsigned char[(*j)->lenght];
+					(*j)->data = new unsigned char[(*j)->length];
 					(*i)->VFile->Seek((*j)->offset);
-					(*i)->VFile->ReadData((*j)->data, (*j)->lenght);
+					(*i)->VFile->ReadData((*j)->data, (*j)->length);
 				}
 				(*j)->offset = TmpVfsFile->Position();
-				TmpVfsFile->WriteData((*j)->data, (*j)->lenght);
+				TmpVfsFile->WriteData((*j)->data, (*j)->length);
 				(*j)->crc = CVFSFile::CalculateCrc32((*j));
 				delete[] (*j)->data;
 				(*j)->data = NULL;
 				FilesProcessed++;
 			}
-			Percent = ((static_cast<double>(FilesProcessed) / static_cast<double>(ProcessCount)) * 100);
+			Percent = int((static_cast<double>(FilesProcessed) / static_cast<double>(ProcessCount)) * 100);
 			if(Percent > PercentOld)
 			{
 				CallBackProc(Percent);
@@ -489,8 +489,8 @@ void CIndex::GetFileInfo(const char* FileName, VFileInfo* FileInfo, bool CalcCrc
 				if(!RoseFile->data)
 				{
 					(*i)->VFile->Seek(RoseFile->offset);
-					RoseFile->data = new unsigned char[RoseFile->lenght];
-					(*i)->VFile->ReadData(RoseFile->data, RoseFile->lenght);
+					RoseFile->data = new unsigned char[RoseFile->length];
+					(*i)->VFile->ReadData(RoseFile->data, RoseFile->length);
 				}
 				FileInfo->dwCRC = (*i)->CalculateCrc32(RoseFile);
 				RoseFile->crc = FileInfo->dwCRC;
@@ -637,12 +637,12 @@ CVFSFile::File* CIndex::OpenFile(const char* FileName)
 			RoseFile->path = NormalizedName;
 			RoseFile->currentPosition = 0;
 			RoseFile->deleted = false;
-			RoseFile->lenght = FFile->Size();
+			RoseFile->length = FFile->Size();
 			RoseFile->offset = 0;
-			RoseFile->lEndOff = RoseFile->lenght;
+			RoseFile->lEndOff = RoseFile->length;
 			RoseFile->btEncrypted = 0;
-			RoseFile->data = new unsigned char[RoseFile->lenght];
-			FFile->ReadData(RoseFile->data, RoseFile->lenght);
+			RoseFile->data = new unsigned char[RoseFile->length];
+			FFile->ReadData(RoseFile->data, RoseFile->length);
 			RoseFile->crc = 0;
 			RoseFile->hash = 0;
 			RoseFile->version = this->GetCurrentVersion();
@@ -669,9 +669,9 @@ CVFSFile::File* CIndex::OpenFile(const char* FileName)
 		{
 			if((*i)->FileTable.getHash(toHash(NormalizedName), &RoseFile))
 			{
-				RoseFile->data = new unsigned char[RoseFile->lenght];
+				RoseFile->data = new unsigned char[RoseFile->length];
 				(*i)->VFile->Seek(RoseFile->offset);
-				(*i)->VFile->ReadData(RoseFile->data, RoseFile->lenght);
+				(*i)->VFile->ReadData(RoseFile->data, RoseFile->length);
 				RoseFile->currentPosition = 0;
 				delete[] NormalizedName;
 				NormalizedName = NULL;
@@ -695,7 +695,7 @@ int CIndex::GetFileSize(const char* FileName)
 		{
 			delete[] NormalizedName;
 			NormalizedName = NULL;
-			return RoseFile->lenght;
+			return RoseFile->length;
 		}
 	}
 	delete[] NormalizedName;

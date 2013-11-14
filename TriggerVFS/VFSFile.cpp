@@ -136,7 +136,7 @@ const DWORD CRC32table[ 256 ] = {
 unsigned int CVFSFile::CalculateCrc32(CVFSFile::File* RoseFile)
 {
 	unsigned int m_dwCRC32 = 0;
-	int Size = RoseFile->lenght;
+	int Size = RoseFile->length;
 	const unsigned char* lpData = reinterpret_cast<const unsigned char*>(RoseFile->data);
 	if ( Size > 0 ) {
 		m_dwCRC32 = ~m_dwCRC32;

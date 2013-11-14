@@ -53,7 +53,7 @@ private:
 	char* name;
 	int baseVersion;
 	int currentVersion;	
-	int vfsCount; //why such a big lenght for vfsCount :O
+	int vfsCount; //why such a big length for vfsCount :O
 	CVFSFile* Root;
 	FlatFile* IFile;
 };

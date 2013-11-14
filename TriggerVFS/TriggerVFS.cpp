@@ -201,7 +201,7 @@ size_t __stdcall vfread(void *buffer, size_t size, size_t count, CVFSFile::File*
 		return 0;
 	}
 
-	if((pVFH->currentPosition + (size * count)) <= pVFH->lenght)
+	if((pVFH->currentPosition + (size * count)) <= pVFH->length)
 	{
 		size_t readsize = size * count;
 		if((pVFH->currentPosition + readsize) >= pVFH->lEndOff)
@@ -224,7 +224,7 @@ void* __stdcall vfgetdata(size_t * psize, CVFSFile::File* pVFH)
 	}
 	if(psize)
 	{
-		*psize = pVFH->lenght;
+		*psize = pVFH->length;
 	}
 	if(pVFH->data)
 	{
@@ -252,7 +252,7 @@ int __stdcall vfseek(CVFSFile::File* pVFH, long offset, int origin )
 	}
 	else if(origin == SEEK_END)
 	{
-		pVFH->currentPosition = (pVFH->lenght - 1) + offset;
+		pVFH->currentPosition = (pVFH->length - 1) + offset;
 	}
 	else
 	{
@@ -276,7 +276,7 @@ int __stdcall vfeof(CVFSFile::File* pVFH)
 	{
 		return -1;
 	}
-	return (pVFH->currentPosition == pVFH->lenght ? 1 : 0);
+	return (pVFH->currentPosition == pVFH->length ? 1 : 0);
 }
 
 size_t __stdcall vfgetsize(CVFSFile::File* pVFH)
@@ -285,7 +285,7 @@ size_t __stdcall vfgetsize(CVFSFile::File* pVFH)
 	{
 		return 0;
 	}
-	return pVFH->lenght;
+	return pVFH->length;
 }
 
 size_t __stdcall VGetFileLength (CIndex* hVFS, const char *FileName)
